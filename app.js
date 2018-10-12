@@ -9,20 +9,31 @@ let options = {
     newPath: "output"
 }
 
+let cfg = {
+    assetsFolder: process.env.assetsFolder || "assets"
+}
 
-rcs.process.auto(['./input/*.js', './input/*.html', './input/*.css'], options, (err) => {
+
+rcs.process.auto([`./input/**/*.js`, `./input/*.html`, `./input/**/*.css`], options, (err) => {
     
-    rcs.generateMapping('./', { overwrite: true }, (err) => {
+    rcs.generateMapping('./output/input/', { overwrite: true }, (err) => {
         // the mapping file is now saved
     });
 });
 
-fs.readdirSync('./input/images').forEach(file => {
-  console.log(file);
-  Jimp.read(`./input/images/${file}`, (err, image) => {
-	  if (err) throw err;
-	  image
-	    .blur( 1 )
-	    .write(`./output/images/${file}`); // save
-	});
+fs.readdirSync(`./input/${cfg.assetsFolder}`).forEach(file => {
+    let type = file.substr(file.indexOf(".") + 1);
+    if (type == 'png' || type == "jpg"){
+        Jimp.read(`./input/${cfg.assetsFolder}/${file}`, (err, image) => {
+            if (err) throw err;
+            image
+               .blur( 1 )
+               .write(`./output/input/${cfg.assetsFolder}/${file}`); // save
+        });
+    }
+    else if ( type != "css" && type != "js"){
+        fs.mkdir(`./output/input/${cfg.assetsFolder}`, err => { 
+            fs.rename(`./input/${cfg.assetsFolder}/${file}`, `./output/input/${cfg.assetsFolder}/${file}`); 
+        })
+    }
 })
