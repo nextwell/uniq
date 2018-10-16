@@ -1,0 +1,118 @@
+button{
+	cursor: pointer;
+}
+
+body, html{
+	width: 100%;
+	height: 100%;
+}
+.centered{
+	text-align: center;
+}
+
+
+/* ---------------------------- LOGIN -------------------------------- */
+
+
+
+html,body{
+	margin: 0;
+	padding: 0;
+	background-color: #fff;
+	min-width: 320px;
+	height: 100%;
+}
+
+.middle {
+  flex: 1 0 auto;
+}
+
+/* Липкий футер */
+.main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.middle {
+  flex: 1 0 auto;
+}
+.footer_n {
+  flex: 0 0 auto;
+}
+
+textarea {
+	resize: none;
+}
+/* ---------------------- */
+
+button:hover{
+	cursor: pointer;
+}
+.footer{
+	position: absolute;
+    bottom: 0;
+    width: 97%;
+}
+
+/* Настройки placeholder для input */
+
+input:focus::-webkit-input-placeholder { color:transparent; }
+input:focus:-moz-placeholder { color:transparent; } /* FF 4-18 */
+input:focus::-moz-placeholder { color:transparent; } /* FF 19+ */
+input:focus:-ms-input-placeholder { color:transparent; } /* IE 10+ */
+
+/* ---------------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+.main{
+	background-color: #fff;
+	height:100%;
+	position: relative;
+}
+
+
+
+.centered-text{
+	text-align: center;
+	color: #838A95;
+}
+
+
+.error{
+	color: red;
+}
+
+.success{
+	color: green;
+}
+
+.centered-image{
+	margin: 0 auto;
+}
+
+.modelimg{
+	max-width: 100%;
+	max-height: 100%;
+}
+
+
+
+
+
+
+
+
+
+.custom-file-control:before{
+  content: "Просмотр" !important;
+}
+
+.custom-file{
+	width: 100% !important;
+	text-align: left !important;
+}
+
+
+.custom-file-control{
+	overflow: hidden !important;
+}
