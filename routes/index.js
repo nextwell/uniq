@@ -9,6 +9,13 @@ let fs        = require('fs'),
 
 const rcs = require('rename-css-selectors');
 
+const imagemin = require('imagemin');
+const imageminJpegtran = require('imagemin-jpegtran');
+const imageminPngquant = require('imagemin-pngquant');
+
+
+
+
 async function upload(files){
 	console.log("Upload started")
 	let time     = new Date(),
@@ -68,6 +75,7 @@ async function uniq(){
 	await fs.readdirSync(`./input/${cfg.assetsFolder}`).forEach(async file => {
 	    let type = file.substr(file.indexOf(".") + 1);
 	    if (type == 'png' || type == "jpg"){
+
 	        await Jimp.read(`./input/${cfg.assetsFolder}/${file}`, async (err, image) => {
 	            if (err) console.log(err);
 	            if ( image != undefined ){
@@ -102,7 +110,13 @@ module.exports = (app) => {
 		setTimeout(async function(){
 			await uniq();
 			setTimeout(async function(){
-			
+				const files = await imagemin(['./output/input/assets/*.{jpg,png}'], './output/input/assets', {
+			        plugins: [
+			            imageminJpegtran(),
+			            imageminPngquant({quality: '65-80'})
+			        ]
+			    });
+
 				zipFolder('./output/input', './output/archive.zip', async function(err) {
 				    if(err) {
 				        console.log('zipped error', err);
