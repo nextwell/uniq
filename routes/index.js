@@ -14,6 +14,10 @@ const imageminJpegtran = require('imagemin-jpegtran');
 const imageminPngquant = require('imagemin-pngquant');
 
 
+const sharp = require('sharp');
+const ExifTransformer = require('exif-be-gone');
+
+const toStream = require('buffer-to-stream');
 
 
 async function upload(files){
@@ -76,7 +80,25 @@ async function uniq(){
 	    let type = file.substr(file.indexOf(".") + 1);
 	    if (type == 'png' || type == "jpg"){
 
-	        await Jimp.read(`./input/${cfg.assetsFolder}/${file}`, async (err, image) => {
+	    	await sharp(`./input/${cfg.assetsFolder}/${file}`)
+			  .blur(0.3)
+			  .toFile(`./output/input/${cfg.assetsFolder}/${file}`, (err, info) => { 
+			  	if(err){
+			  		console.log(err);
+			 	 } 
+			 	else {
+			 		if ( type == 'jpg' ){
+			 			const reader = fs.readFileSync(`./output/input/${cfg.assetsFolder}/${file}`)
+						const writer = fs.createWriteStream(`./output/input/${cfg.assetsFolder}/${file}`)
+
+						toStream(reader).pipe(new ExifTransformer()).pipe(writer)
+			 		}
+			 	}
+			});
+
+
+
+	        /*await Jimp.read(`./input/${cfg.assetsFolder}/${file}`, async (err, image) => {
 	            if (err) console.log(err);
 	            if ( image != undefined ){
 	            	await image
@@ -84,7 +106,7 @@ async function uniq(){
 	               		.write(`./output/input/${cfg.assetsFolder}/${file}`);
 	            }
 	            else console.log("image is undefined")
-	        });
+	        });*/
 	    }
 	    else if ( type != "css" && type != "js"){
 	        await fs.mkdir(`./output/input/${cfg.assetsFolder}`,async err => { 
