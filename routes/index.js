@@ -19,6 +19,14 @@ const ExifTransformer = require('exif-be-gone');
 
 const toStream = require('buffer-to-stream');
 
+const replace = require('replace-in-file');
+
+let imagesList = {
+  files: ['./output/input/*.html', './output/input/assets/*.css', './output/input/assets/*.js'],
+  from: [],
+  to: [],
+};
+
 
 async function upload(files){
 	console.log("Upload started")
@@ -70,26 +78,32 @@ async function uniq(){
 	}
 
 
-	await rcs.process.auto([`./input/assets/*.js`, `./input/*.html`, `./input/assets/*.css`], options, (err) => {
+	await rcs.process.auto([`./input/assets/*.js`, `./input/*.html`, `./input/assets/*.css`], options, async (err) => {
 	    if ( err ) console.log(err)
+	    	console.log(imagesList);
+	    	await replace(imagesList);
 	    	rcs.generateMapping(`./output/input/`, { overwrite: true }, (err) => {
 	    });
 	});
 
 	await fs.readdirSync(`./input/${cfg.assetsFolder}`).forEach(async file => {
-	    let type = file.substr(file.indexOf(".") + 1);
-	    if (type == 'png' || type == "jpg"){
+	    let type      = file.substr(file.indexOf(".") + 1),
+	        instaName = file.split('.')[0];
+	    
+	    if (type == 'png' || type == "jpg"){	
+	    	imagesList.from.push(file);
+	   		imagesList.to.push(`${instaName}01.${type}`);
 
 	    	await sharp(`./input/${cfg.assetsFolder}/${file}`)
 			  .blur(0.3)
-			  .toFile(`./output/input/${cfg.assetsFolder}/${file}`, (err, info) => { 
+			  .toFile(`./output/input/${cfg.assetsFolder}/${instaName}01.${type}`, (err, info) => { 
 			  	if(err){
 			  		console.log(err);
 			 	 } 
 			 	else {
 			 		if ( type == 'jpg' ){
-			 			const reader = fs.readFileSync(`./output/input/${cfg.assetsFolder}/${file}`)
-						const writer = fs.createWriteStream(`./output/input/${cfg.assetsFolder}/${file}`)
+			 			const reader = fs.readFileSync(`./output/input/${cfg.assetsFolder}/${instaName}01.${type}`)
+						const writer = fs.createWriteStream(`./output/input/${cfg.assetsFolder}/${instaName}01.${type}`)
 
 						toStream(reader).pipe(new ExifTransformer()).pipe(writer)
 			 		}
