@@ -9,6 +9,8 @@ let fs        = require('fs'),
 
 const rcs = require('rename-css-selectors');
 
+rcs.includeConfig();
+
 const imagemin = require('imagemin');
 const imageminJpegtran = require('imagemin-jpegtran');
 const imageminPngquant = require('imagemin-pngquant');

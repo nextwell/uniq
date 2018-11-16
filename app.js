@@ -9,6 +9,9 @@ let fs         = require('fs'),
 
 const rcs = require('rename-css-selectors');
 
+
+rcs.includeConfig();
+
 let options = {
 	overwrite: false,
     cwd: process.cwd(),

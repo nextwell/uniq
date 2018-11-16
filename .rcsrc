@@ -1,0 +1,13 @@
+{
+    "exclude": [
+        "container",
+        "header",
+        "content",
+        "header-wrapper",
+        "wrapper",
+        "btn",
+        "main",
+        "main-wrapper",
+        "sticky-header"
+    ]
+}
