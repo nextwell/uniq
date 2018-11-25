@@ -5,7 +5,8 @@ let fs        = require('fs'),
 	mkdirp    = require('mkdirp'),
     Jimp      = require('jimp'),
     zipFolder = require('zip-folder'),
-    rimraf	  = require('rimraf');
+    rimraf	  = require('rimraf')
+    fsc       = require("fs-cheerio");
 
 const rcs = require('rename-css-selectors');
 
@@ -28,6 +29,44 @@ let imagesList = {
   from: [],
   to: [],
 };
+
+
+async function modifyHTML(sentencesArray){
+	let Code = await fsc.readFile('./output/input/index.html');
+
+	//Code('div').append('<div class="dh">TEXT</div>');
+
+	console.log(Code('body').html())
+
+	let iter = 0;
+
+	// algorithm
+
+	Code('div').each(function(i, div){
+		let numDivs = Math.floor(Math.random() * 4) + 1;
+
+		let textDivIndex = Math.floor(Math.random() * numDivs) + 1;
+		for ( let i = 0; i < numDivs; i++ ){
+			if ( numDivs == textDivIndex ){
+				Code(div).append(`<div class="dh">${sentencesArray[iter]}</div>`);
+				iter++;
+				if ( !sentencesArray[iter] ){
+					iter = 0;
+				}
+	
+			}
+			else {
+				Code(div).append('<div class="dh"></div>');
+			}
+		}
+		
+	})
+
+	// --------------------------------------------------------------------
+
+
+	await fsc.writeFile('./output/input/index.html', Code);
+}
 
 
 async function upload(files){
@@ -94,18 +133,18 @@ async function uniq(){
 	    
 	    if (type == 'png' || type == "jpg"){	
 	    	imagesList.from.push(file);
-	   		imagesList.to.push(`${instaName}01.${type}`);
+	   		imagesList.to.push(`${instaName}.${type}`);
 
 	    	await sharp(`./input/${cfg.assetsFolder}/${file}`)
 			  .blur(0.3)
-			  .toFile(`./output/input/${cfg.assetsFolder}/${instaName}01.${type}`, (err, info) => { 
+			  .toFile(`./output/input/${cfg.assetsFolder}/${instaName}.${type}`, (err, info) => { 
 			  	if(err){
 			  		console.log(err);
 			 	 } 
 			 	else {
 			 		if ( type == 'jpg' ){
-			 			const reader = fs.readFileSync(`./output/input/${cfg.assetsFolder}/${instaName}01.${type}`)
-						const writer = fs.createWriteStream(`./output/input/${cfg.assetsFolder}/${instaName}01.${type}`)
+			 			const reader = fs.readFileSync(`./output/input/${cfg.assetsFolder}/${instaName}.${type}`)
+						const writer = fs.createWriteStream(`./output/input/${cfg.assetsFolder}/${instaName}.${type}`)
 
 						toStream(reader).pipe(new ExifTransformer()).pipe(writer)
 			 		}
@@ -144,16 +183,21 @@ module.exports = (app) => {
 	app.post('/', async (req, res) => {
 		await upload(req.files);
 
-
-		setTimeout(async function(){
+		let textFull = req.body.text;
+		console.log(textFull);
+		let sentences = textFull.split('.');
+		console.log(sentences);
+		setTimeout(async () => {
 			await uniq();
-			setTimeout(async function(){
+			setTimeout(async () => {
 				const files = await imagemin(['./output/input/assets/*.{jpg,png}'], './output/input/assets', {
 			        plugins: [
 			            imageminJpegtran(),
 			            imageminPngquant({quality: '65-80'})
 			        ]
 			    });
+
+			    await modifyHTML(sentences);
 
 				zipFolder('./output/input', './output/archive.zip', async function(err) {
 				    if(err) {
