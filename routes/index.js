@@ -31,12 +31,14 @@ let imagesList = {
 };
 
 
-async function modifyHTML(sentencesArray){
+
+
+async function modifyHTML(sentencesArray, randomTextArray){
 	let Code = await fsc.readFile('./output/input/index.html');
 
 	//Code('div').append('<div class="dh">TEXT</div>');
 
-	console.log(Code('body').html())
+	//console.log(Code('body').html())
 
 	let iter = 0;
 
@@ -66,6 +68,22 @@ async function modifyHTML(sentencesArray){
 
 
 	await fsc.writeFile('./output/input/index.html', Code);
+
+
+
+	// HERE REPLACE TEXT ON TOKEN !!!WORK
+	replaceTokenArray = ['[ReplaceToken]'];
+	for ( let e = 0; e < 1000; e++ ){
+		replaceTokenArray.push('[ReplaceToken]');
+	}
+
+	let opt = {
+	  files: ['./output/input/index.html'],
+	  from: replaceTokenArray,
+	  to: randomTextArray,
+	};
+
+	replace(opt);
 }
 
 
@@ -117,6 +135,7 @@ async function uniq(){
 	let cfg = {
 	    assetsFolder: process.env.assetsFolder || "assets"
 	}
+
 
 
 	await rcs.process.auto([`./input/assets/*.js`, `./input/*.html`, `./input/assets/*.css`], options, async (err) => {
@@ -172,6 +191,54 @@ async function uniq(){
 
 }
 
+function randomise(){
+	let time     = new Date(),
+		dirTime  = time.getTime(),
+		dirStr   =  Math.random()
+			                .toString(36)
+			    			.slice(2, 2 + Math.max(1, Math.min(15, 25)) )
+		return `${dirTime + dirStr}`;
+}
+
+
+async function renamer(){
+	let oldNames = [], newNames = [], FilesWithNames = ['./output/input/index.html'];
+	await fs.readdirSync(`${__dirname}/../output/input/assets/`).forEach(async file => {
+		    let type      = file.substr(file.indexOf(".") + 1),
+		        instaName = file.split('.')[0];
+		        if ( type == 'css' ){
+		        	FilesWithNames.push(`./output/input/assets/${file}`);
+		        }
+		    	else if ( type == 'png' || type == 'jpg'){
+		    		let oldName = file;
+		    		let newName = `${randomise()}.${type}`;
+		    		oldNames.push(oldName);
+
+		    		newNames.push(newName);
+
+		    		
+		    		await fs.rename(`${__dirname}/../output/input/assets/${file}`, `${__dirname}/../output/input/assets/${newName}`, (err) => {
+		    			if (err) console.log(err)
+		    		}); 
+		    	}
+		    	else {
+		    		await fs.rename(`${__dirname}/../output/input/assets/${file}`, `${__dirname}/../output/input/assets/${file}`, (err) => {
+		    			if (err) console.log(err)
+		    		}); 
+		    	}
+
+		})
+	let opt = {
+	  files: FilesWithNames,
+	  from: oldNames,
+	  to: newNames,
+	};
+	console.log(opt);
+	let changes = await replace(opt);
+	console.log(changes);
+}
+
+
 
 
 module.exports = (app) => {
@@ -184,12 +251,14 @@ module.exports = (app) => {
 		await upload(req.files);
 
 		let textFull = req.body.text;
-		console.log(textFull);
 		let sentences = textFull.split('.');
-		console.log(sentences);
+		let tokenText = req.body.tokenText;
+
+		let tokenArray = tokenText.split('.');
 		setTimeout(async () => {
 			await uniq();
 			setTimeout(async () => {
+				await renamer();
 				const files = await imagemin(['./output/input/assets/*.{jpg,png}'], './output/input/assets', {
 			        plugins: [
 			            imageminJpegtran(),
@@ -197,7 +266,8 @@ module.exports = (app) => {
 			        ]
 			    });
 
-			    await modifyHTML(sentences);
+			    await modifyHTML(sentences, tokenArray);
+
 
 				zipFolder('./output/input', './output/archive.zip', async function(err) {
 				    if(err) {
