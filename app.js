@@ -64,7 +64,7 @@ app.use(bodyParser.urlencoded({
 app.use(express.static(path.join(__dirname, "client")));
 
 
-const port = 5000;
+const port = 3000;
 
 requireFu(__dirname + '/routes')(app);
 
