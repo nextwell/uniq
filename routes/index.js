@@ -40,6 +40,10 @@ async function modifyHTML(sentencesArray, randomTextArray){
 
 	//console.log(Code('body').html())
 
+	randomTextArray.forEach((item, i, array) => {
+		randomTextArray[i] = `<span class="dh">${item}</span>`;
+	})
+
 	let iter = 0;
 
 	// algorithm
