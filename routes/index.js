@@ -76,10 +76,13 @@ async function modifyHTML(sentencesArray, randomTextArray){
 
 
 	// HERE REPLACE TEXT ON TOKEN !!!WORK
-	replaceTokenArray = ['[ReplaceToken]'];
+	replaceTokenArray = ['ReplaceToken'];
 	for ( let e = 0; e < 1000; e++ ){
-		replaceTokenArray.push('[ReplaceToken]');
-		randomTextArray = [...randomTextArray, ...randomTextArray]
+		replaceTokenArray.push('ReplaceToken');
+	}
+
+	for ( let f = 0; f < 10; f++ ){
+		randomTextArray = [...randomTextArray, ...randomTextArray];
 	}
 
 	let opt = {
